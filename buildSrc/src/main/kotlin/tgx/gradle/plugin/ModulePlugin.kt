@@ -159,23 +159,23 @@ open class ModulePlugin : Plugin<Project> {
 
                 isDebuggable = true
                 isJniDebuggable = true
-                isMinifyEnabled = false
+                isMinifyEnabled = !config.doNotObfuscate
+                isShrinkResources = !config.doNotObfuscate
 
                 ndk.debugSymbolLevel = "full"
 
-                if (config.forceOptimize) {
-                  proguardFiles(
-                    getDefaultProguardFile(ProguardFiles.ProguardFile.OPTIMIZE.fileName),
-                    "proguard-rules.pro"
-                  )
-                  if (config.isHuaweiBuild) {
-                    proguardFile("proguard-hms.pro")
-                  }
+                proguardFiles(
+                  getDefaultProguardFile(ProguardFiles.ProguardFile.OPTIMIZE.fileName),
+                  "proguard-rules.pro"
+                )
+
+                if (config.isHuaweiBuild) {
+                  proguardFile("proguard-hms.pro")
                 }
               }
 
               getByName("release") {
-                signingConfig = signingConfigs["release"]
+                signingConfig = signingConfigs["debug"]
 
                 isMinifyEnabled = !config.doNotObfuscate
                 isShrinkResources = !config.doNotObfuscate
