@@ -442,6 +442,9 @@ public class ImageFile {
   }
 
   public String getFileLoadKey () {
+    if (file != null && file.remote != null && !me.vkryl.core.StringUtils.isEmpty(file.remote.uniqueId)) {
+      return accountId() + "_" + file.remote.uniqueId;
+    }
     return getFileLoadKey(accountId(), file.id);
   }
 

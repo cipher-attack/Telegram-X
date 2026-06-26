@@ -57,6 +57,9 @@ public class ImageFileRemote extends ImageFile {
 
   @Override
   public final String getFileLoadKey () {
+    if (forceRemoteId == null && file != null && file.remote != null && !me.vkryl.core.StringUtils.isEmpty(file.remote.uniqueId)) {
+      return ImageFile.getFileLoadKey(accountId(), file.remote.uniqueId);
+    }
     return ImageFile.getFileLoadKey(accountId(), forceRemoteId != null ? forceRemoteId : file.remote.id);
   }
 

@@ -243,6 +243,10 @@ public class ImageLoader {
     synchronized (watchers) {
       String cacheKey = ImageFile.getFileLoadKey(tdlib, file.id);
       ArrayList<String> actors = workers.get(cacheKey); // remoteFiles.get(file.id) != null ? loadingRemoteFiles.get(file.remote.id) : loadingFiles.get(file.id);
+      if (actors == null && file.remote != null && !me.vkryl.core.StringUtils.isEmpty(file.remote.uniqueId)) {
+        cacheKey = ImageFile.getFileLoadKey(tdlib, file.remote.uniqueId);
+        actors = workers.get(cacheKey);
+      }
       if (actors == null) {
         cacheKey = ImageFile.getFileLoadKey(tdlib, file.remote.id);
         actors = workers.get(cacheKey);
@@ -283,6 +287,9 @@ public class ImageLoader {
 
     synchronized (watchers) {
       ArrayList<String> actors = workers.get(ImageFile.getFileLoadKey(tdlib, file.id));
+      if (actors == null && file.remote != null && !me.vkryl.core.StringUtils.isEmpty(file.remote.uniqueId)) {
+        actors = workers.get(ImageFile.getFileLoadKey(tdlib, file.remote.uniqueId));
+      }
       if (actors == null) {
         actors = workers.get(ImageFile.getFileLoadKey(tdlib, file.remote.id));
       }

@@ -117,6 +117,10 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
   private ComplexReceiver complexReceiver;
   private MessageViewGroup parentMessageViewGroup;
   private MessagesManager manager;
+  
+  private long lastClickTime = 0;
+  private float lastClickX = 0;
+  private float lastClickY = 0;
 
 
   public MessageView (Context context) {
@@ -1618,10 +1622,34 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
         }
         if ((flags & FLAG_CAUGHT_MESSAGE_TOUCH) != 0) {
           flags &= ~FLAG_CAUGHT_MESSAGE_TOUCH;
+          long time = android.os.SystemClock.uptimeMillis();
+          if (time - lastClickTime < android.view.ViewConfiguration.getDoubleTapTimeout() && Math.abs(e.getX() - lastClickX) < 100 && Math.abs(e.getY() - lastClickY) < 100) {
+            lastClickTime = 0;
+            if (msg.messagesController() != null && msg.messagesController().tdlib() != null) {
+              msg.messagesController().tdlib().forwardMessage(msg.messagesController().tdlib().myId(), null, msg.getChatId(), msg.getId(), null);
+              org.thunderdog.challegram.widget.UI.showToast("Forwarded to Saved Messages", android.widget.Toast.LENGTH_SHORT);
+            }
+            return true;
+          }
+          lastClickTime = time;
+          lastClickX = e.getX();
+          lastClickY = e.getY();
           return msg.onTouchEvent(this, e);
         }
         if ((flags & FLAG_CAUGHT_CLICK) != 0) {
           flags &= ~FLAG_CAUGHT_CLICK;
+          long time = android.os.SystemClock.uptimeMillis();
+          if (time - lastClickTime < android.view.ViewConfiguration.getDoubleTapTimeout() && Math.abs(e.getX() - lastClickX) < 100 && Math.abs(e.getY() - lastClickY) < 100) {
+            lastClickTime = 0;
+            if (msg.messagesController() != null && msg.messagesController().tdlib() != null) {
+              msg.messagesController().tdlib().forwardMessage(msg.messagesController().tdlib().myId(), null, msg.getChatId(), msg.getId(), null);
+              org.thunderdog.challegram.widget.UI.showToast("Forwarded to Saved Messages", android.widget.Toast.LENGTH_SHORT);
+            }
+            return true;
+          }
+          lastClickTime = time;
+          lastClickX = e.getX();
+          lastClickY = e.getY();
           if (onMessageClick(e.getX(), e.getY())) {
             ViewUtils.onClick(this);
             return true;
