@@ -1,0 +1,70 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        lfs: true
+
+    - name: set up JDK 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Cache Build Folders
+      uses: actions/cache@v3
+      with:
+        path: |
+          app/build
+          app/.cxx
+          submodules/td
+        key: ${{ runner.os }}-build-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-build-
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Set up local.properties
+      run: |
+        cp local.properties.sample local.properties || true
+        echo "" >> local.properties
+        echo "telegram.api_id=356636818" >> local.properties
+        echo "telegram.api_hash=15430448yehw79e05kaa671124e4fd02e96" >> local.properties
+
+    - name: Run setup script
+      env:
+        TERM: xterm
+        ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
+      run: |
+        yes | bash scripts/setup.sh
+
+    - name: Clean Old Cached APKs
+      run: |
+        find app/build/ -type f -name "*.apk" -delete 2>/dev/null || true
+
+    - name: Build with Gradle (armeabi-v7a only)
+      run: ./gradlew assembleLegacyArm32Debug --parallel
+
+    - name: Filter and Clean APK
+      run: |
+        mkdir -p clean_apk
+        find app/build/outputs/apk/ -type f -name "*debug*.apk" -exec cp {} clean_apk/ \;
+        ls -l clean_apk
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Telegram-X-armeabi-v7a-Debug-APK
+        path: clean_apk/*.apk
