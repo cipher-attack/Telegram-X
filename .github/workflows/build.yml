@@ -2,7 +2,7 @@ name: Android CI
 
 on:
   push:
-    branches: [ "master", "main" ]
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
@@ -40,8 +40,8 @@ jobs:
       run: |
         cp local.properties.sample local.properties || true
         echo "" >> local.properties
-        echo "telegram.api_id=356636818" >> local.properties
-        echo "telegram.api_hash=15430448yehw79e05kaa671124e4fd02e96" >> local.properties
+        echo "telegram.api_id=${{ secrets.TELEGRAM_API_ID }}" >> local.properties
+        echo "telegram.api_hash=${{ secrets.TELEGRAM_API_HASH }}" >> local.properties
 
     - name: Run setup script
       env:
