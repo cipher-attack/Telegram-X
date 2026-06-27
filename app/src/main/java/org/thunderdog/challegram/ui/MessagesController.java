@@ -5762,6 +5762,31 @@ public class MessagesController extends ViewController<MessagesController.Argume
       } else if (id == R.id.btn_messageReplyWithDice) {
         sendDice(itemView, ((TdApi.MessageDice) selectedMessage.getMessage().content).emoji);
         return true;
+      } else if (id == R.id.btn_copyText) {
+        if (!selectedMessage.canBeSaved()) {
+          context().tooltipManager().builder(itemView).show(tdlib, R.string.ChannelNoCopy).hideDelayed();
+          return false;
+        }
+        TdApi.Message message = selectedMessage.getNewestMessage();
+        TdApi.FormattedText text = Td.textOrCaption(message.content);
+        if (text != null && text.text != null) {
+          android.content.Context ctx = context();
+          android.widget.ScrollView scrollView = new android.widget.ScrollView(ctx);
+          android.widget.TextView textView = new android.widget.TextView(ctx);
+          textView.setTextIsSelectable(true);
+          textView.setText(text.text);
+          textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 16);
+          textView.setTextColor(org.thunderdog.challegram.theme.Theme.getColor(org.thunderdog.challegram.theme.ColorId.text_primary));
+          int padding = org.thunderdog.challegram.tool.Screen.dp(16f);
+          textView.setPadding(padding, padding, padding, padding);
+          scrollView.addView(textView);
+          android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(ctx, org.thunderdog.challegram.theme.Theme.dialogTheme());
+          builder.setTitle(org.thunderdog.challegram.core.Lang.getString(R.string.CopyText));
+          builder.setView(scrollView);
+          builder.setPositiveButton(org.thunderdog.challegram.core.Lang.getString(R.string.Close), null);
+          showDialog(builder.create());
+        }
+        return true;
       } else if (id == R.id.btn_copyTranslation || id == R.id.btn_messageCopy) {
         if (!selectedMessage.canBeSaved()) {
           context().tooltipManager().builder(itemView).show(tdlib, R.string.ChannelNoCopy).hideDelayed();

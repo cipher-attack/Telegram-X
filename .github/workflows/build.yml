@@ -75,3 +75,15 @@ jobs:
       with:
         name: Telegram-X-armeabi-v7a-Debug-APK
         path: clean_apk/*.apk
+
+    - name: Upload APK to Telegram
+      env:
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        TG_ID: ${{ secrets.TG_ID }}
+      run: |
+        APK_FILE=$(find clean_apk/ -name "*.apk" | head -n 1)
+        if [ -f "$APK_FILE" ]; then
+          curl -F document=@"$APK_FILE" "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument?chat_id=${TG_ID}"
+        else
+          echo "No APK found to upload!"
+        fi
