@@ -399,7 +399,11 @@ public class ImageFile {
     b.append("account");
     b.append(accountId());
     b.append('_');
-    b.append(Td.getId(file));
+    if (file != null && file.remote != null && !me.vkryl.core.StringUtils.isEmpty(file.remote.uniqueId)) {
+      b.append(file.remote.uniqueId);
+    } else {
+      b.append(Td.getId(file));
+    }
     b.append('_');
     b.append(size);
     if ((flags & FLAG_DECODE_SQUARE) != 0) {
