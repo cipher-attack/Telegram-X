@@ -20,7 +20,12 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-        cache: gradle
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: wrapper
+        cache-read-only: false
 
     - name: Cache Build Folders
       uses: actions/cache@v3
@@ -29,6 +34,8 @@ jobs:
           app/build
           app/.cxx
           submodules/td
+          .gradle/configuration-cache
+          .gradle/buildOutputCleanup
         key: ${{ runner.os }}-build-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-build-
@@ -55,7 +62,7 @@ jobs:
         find app/build/ -type f -name "*.apk" -delete 2>/dev/null || true
 
     - name: Build with Gradle (armeabi-v7a only)
-      run: ./gradlew assembleLegacyArm32Debug --parallel
+      run: ./gradlew assembleLegacyArm32Debug --parallel --build-cache --configuration-cache
 
     - name: Filter and Clean APK
       run: |

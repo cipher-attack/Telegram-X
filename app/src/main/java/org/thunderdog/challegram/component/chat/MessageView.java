@@ -1626,8 +1626,8 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
           if (time - lastClickTime < android.view.ViewConfiguration.getDoubleTapTimeout() && Math.abs(e.getX() - lastClickX) < 100 && Math.abs(e.getY() - lastClickY) < 100) {
             lastClickTime = 0;
             if (msg.messagesController() != null && msg.messagesController().tdlib() != null) {
-              msg.messagesController().tdlib().forwardMessage(msg.messagesController().tdlib().myId(), null, msg.getChatId(), msg.getId(), null);
-              org.thunderdog.challegram.widget.UI.showToast("Forwarded to Saved Messages", android.widget.Toast.LENGTH_SHORT);
+              msg.messagesController().tdlib().forwardMessage(msg.messagesController().tdlib().myUserId(), null, msg.getChatId(), msg.getId(), null);
+              android.widget.Toast.makeText(getContext(), "Forwarded to Saved Messages", android.widget.Toast.LENGTH_SHORT).show();
             }
             return true;
           }
@@ -1642,8 +1642,8 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
           if (time - lastClickTime < android.view.ViewConfiguration.getDoubleTapTimeout() && Math.abs(e.getX() - lastClickX) < 100 && Math.abs(e.getY() - lastClickY) < 100) {
             lastClickTime = 0;
             if (msg.messagesController() != null && msg.messagesController().tdlib() != null) {
-              msg.messagesController().tdlib().forwardMessage(msg.messagesController().tdlib().myId(), null, msg.getChatId(), msg.getId(), null);
-              org.thunderdog.challegram.widget.UI.showToast("Forwarded to Saved Messages", android.widget.Toast.LENGTH_SHORT);
+              msg.messagesController().tdlib().forwardMessage(msg.messagesController().tdlib().myUserId(), null, msg.getChatId(), msg.getId(), null);
+              android.widget.Toast.makeText(getContext(), "Forwarded to Saved Messages", android.widget.Toast.LENGTH_SHORT).show();
             }
             return true;
           }
