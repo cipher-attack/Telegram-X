@@ -120,7 +120,6 @@ public class TGMessageText extends TGMessage {
     super(context, sponsoredMessage, inChatId, isBelowAllMessages);
     this.currentMessageText = (TdApi.MessageText) sponsoredMessage.content;
     setText(currentMessageText.text, false);
-    // TODO button
   }
 
   public TGMessageText (MessagesManager context, TdApi.Message msg, TdApi.FormattedText text) {
@@ -158,7 +157,6 @@ public class TGMessageText extends TGMessage {
     Uri uri = null;
     for (TdApi.TextEntity entity : text.entities) {
       String url;
-      //noinspection SwitchIntDef
       switch (entity.type.getConstructor()) {
         case TdApi.TextEntityTypeUrl.CONSTRUCTOR:
           url = Td.substring(text.text, entity);
@@ -189,7 +187,7 @@ public class TGMessageText extends TGMessage {
         return MESSAGE_REPLACE_REQUIRED;
       }
       if (messageContent != null && Td.isAnimatedEmoji(messageContent) && !allowEmoji) {
-        messageContent = new TdApi.MessageText(Td.textOrCaption(messageContent), null, null);
+        messageContent = new TdApi.MessageText(((TdApi.MessageText) messageContent).text, null, null);
       }
       if (this.pendingMessageText != messageContent) {
         if (messageContent != null && !Td.isText(messageContent))
@@ -424,7 +422,9 @@ public class TGMessageText extends TGMessage {
   protected boolean onMessageContentChanged (TdApi.Message message, TdApi.MessageContent oldContent, TdApi.MessageContent newContent, boolean isBottomMessage) {
     TdApi.MessageText oldMessageText = Td.isText(oldContent) ? (TdApi.MessageText) oldContent : null;
     TdApi.MessageText newMessageText = Td.isText(newContent) ? (TdApi.MessageText) newContent : null;
-    if (!Td.equalsTo(Td.textOrCaption(oldContent), Td.textOrCaption(newContent)) ||
+    TdApi.FormattedText oldText = oldContent.getConstructor() == TdApi.MessageText.CONSTRUCTOR ? ((TdApi.MessageText) oldContent).text : null;
+    TdApi.FormattedText newTextContent = newContent.getConstructor() == TdApi.MessageText.CONSTRUCTOR ? ((TdApi.MessageText) newContent).text : null;
+    if (!Td.equalsTo(oldText, newTextContent) ||
         !Td.equalsTo(oldMessageText != null ? oldMessageText.linkPreview : null,
                      newMessageText != null ? newMessageText.linkPreview : null) ||
         !Td.equalsTo(oldMessageText != null ? oldMessageText.linkPreviewOptions : null,
@@ -439,7 +439,8 @@ public class TGMessageText extends TGMessage {
   @Override
   protected boolean updateMessageContent (TdApi.Message message, TdApi.MessageContent newContent, boolean isBottomMessage) {
     this.msg.content = newContent;
-    TdApi.MessageText newText = Td.isText(newContent) ? (TdApi.MessageText) newContent : new TdApi.MessageText(Td.textOrCaption(newContent), null, null);
+    TdApi.FormattedText newTextContent = newContent.getConstructor() == TdApi.MessageText.CONSTRUCTOR ? ((TdApi.MessageText) newContent).text : null;
+    TdApi.MessageText newText = Td.isText(newContent) ? (TdApi.MessageText) newContent : new TdApi.MessageText(newTextContent, null, null);
     this.currentMessageText = newText;
     if (!isBeingEdited()) {
       boolean textChanged = setText(newText.text, false);
@@ -505,8 +506,6 @@ public class TGMessageText extends TGMessage {
     }
   }
 
-  // Text without any trash
-
   private int getStartXRtl (TextWrapper wrapper, int startX, int maxWidth) {
     return useBubbles() ? (Config.MOVE_BUBBLE_TIME_RTL_TO_LEFT || wrapper.getLineCount() > 1 ? getActualRightContentEdge() - getBubbleContentPadding() : startX) : startX + maxWidth;
   }
@@ -536,11 +535,9 @@ public class TGMessageText extends TGMessage {
       } else {
         entry.item.beginDrawBatch(textMediaReceiver, 1);
 
-        // top text
         int topTextHeight = (int) ((float) (entry.item.getHeight() + Screen.dp(6f)) * MathUtils.clamp(linkPreviewAboveText));
         entry.item.draw(c, startX, startXRtl, endXPadding, topTextY - topTextHeight, null, textAlpha * MathUtils.clamp(1f - linkPreviewAboveText), textMediaReceiver);
 
-        // bottom text
         entry.item.draw(c, startX, startXRtl, endXPadding, bottomTextY, null, textAlpha * MathUtils.clamp(linkPreviewAboveText), textMediaReceiver);
 
         entry.item.finishDrawBatch(textMediaReceiver, 1);
@@ -578,7 +575,6 @@ public class TGMessageText extends TGMessage {
 
   private int calculateTextLastLineWidth () {
     if (effectiveWrapper != null && Lang.rtl() == effectiveWrapper.getLastLineIsRtl()) {
-      // TODO: support for rtl <-> non-rtl transition
       return Math.round(lastLineWidth.get());
     }
     return BOTTOM_LINE_EXPAND_HEIGHT;
@@ -597,7 +593,6 @@ public class TGMessageText extends TGMessage {
     } else if (linkPreviewAboveText == 1f) {
       return textLastLineWidth;
     } else {
-      // Animated
       return BOTTOM_LINE_DEFINE_BY_FACTOR;
     }
   }
@@ -622,7 +617,7 @@ public class TGMessageText extends TGMessage {
       return linkPreviewLastLineWidth;
     }
     int fromLastLineWidth = linkPreviewLastLineWidth == BOTTOM_LINE_EXPAND_HEIGHT ? linkPreview.getWidth() - bubbleTimePartWidth : linkPreviewLastLineWidth;
-    int toLastLineWidth = /*textLastLineWidth == BOTTOM_LINE_KEEP_WIDTH ? wrapper.getWidth() - bubbleTimePartWidth : */textLastLineWidth;
+    int toLastLineWidth = textLastLineWidth;
     return MathUtils.fromTo(fromLastLineWidth, toLastLineWidth, factor);
   }
 
@@ -639,7 +634,7 @@ public class TGMessageText extends TGMessage {
 
   @Override
   protected void buildReactions (boolean animated) {
-    if (linkPreview != null || !useBubble() || visibleText.isEmpty() || !useReactionBubbles() /*|| replyData != null*/) {
+    if (linkPreview != null || !useBubble() || visibleText.isEmpty() || !useReactionBubbles()) {
       super.buildReactions(animated);
     } else {
       final float maxWidthMultiply = replyData != null ? 1f : 0.7f;
@@ -672,7 +667,7 @@ public class TGMessageText extends TGMessage {
     }
     org.thunderdog.challegram.navigation.ViewController<?> c = org.thunderdog.challegram.navigation.ViewController.findRoot(view);
     if (c instanceof org.thunderdog.challegram.ui.MessagesController) {
-      org.drinkless.tdlib.TdApi.FormattedText text = org.thunderdog.challegram.data.TD.textOrCaption(getMessage().content);
+      org.drinkless.tdlib.TdApi.FormattedText text = getMessage().content.getConstructor() == TdApi.MessageText.CONSTRUCTOR ? ((TdApi.MessageText) getMessage().content).text : null;
       if (text != null && text.text != null) {
         android.content.Context ctx = view.getContext();
         android.widget.ScrollView scrollView = new android.widget.ScrollView(ctx);
@@ -702,8 +697,6 @@ public class TGMessageText extends TGMessage {
       linkPreview.performDestroy();
     }
   }
-
-  // private int touchX, touchY;
 
   @Override
   public boolean onTouchEvent (MessageView view, MotionEvent e) {
