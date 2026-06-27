@@ -891,7 +891,7 @@ public class MessageView extends SparseDrawableView implements Destroyable, Draw
       if (msg instanceof TGMessageText || (msg.getMessage() != null && msg.getMessage().content instanceof TdApi.MessageText)) {
         ids.append(R.id.btn_copyText);
         strings.append(R.string.CopyText);
-        icons.append(R.drawable.baseline_text_format_24);
+        icons.append(R.drawable.baseline_content_copy_24);
       }
       if (msg.isTranslated()) {
         ids.append(R.id.btn_copyTranslation);
