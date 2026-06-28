@@ -671,8 +671,10 @@ public class TGMessageText extends TGMessage {
       if (text != null && text.text != null) {
         android.content.Context ctx = view.getContext();
         android.widget.ScrollView scrollView = new android.widget.ScrollView(ctx);
-        android.widget.TextView textView = new android.widget.TextView(ctx);
+        android.widget.EditText textView = new android.widget.EditText(ctx);
         textView.setTextIsSelectable(true);
+        textView.setKeyListener(null);
+        textView.setBackground(null);
         textView.setText(text.text);
         textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 16);
         textView.setTextColor(org.thunderdog.challegram.theme.Theme.getColor(org.thunderdog.challegram.theme.ColorId.text));
