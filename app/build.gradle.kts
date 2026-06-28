@@ -257,9 +257,6 @@ android {
     if (sdkVariant.maxSdk != null) {
       variantBuilder.maxSdk = sdkVariant.maxSdk
     }
-    variantBuilder.enable = sdkVariant.minSdk >= abiVariant.minSdk &&
-      !(abiVariant.flavor == "universal" && sdkVariant.flavor == "legacy") &&
-      (variantBuilder.buildType != "debug" || (sdkVariant.flavor == "latest" && (abiVariant.flavor == "x64" || abiVariant.flavor == "arm64")))
   }
   productFlavors {
     Sdk.VARIANTS.forEach { (sdkIndex, variant) ->
