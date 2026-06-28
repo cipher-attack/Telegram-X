@@ -5772,19 +5772,21 @@ public class MessagesController extends ViewController<MessagesController.Argume
         if (text != null && text.text != null) {
           android.content.Context ctx = context();
           android.widget.ScrollView scrollView = new android.widget.ScrollView(ctx);
-          android.widget.TextView textView = new android.widget.TextView(ctx);
+          android.widget.EditText textView = new android.widget.EditText(ctx);
           textView.setTextIsSelectable(true);
+          textView.setKeyListener(null);
+          textView.setBackground(null);
           textView.setText(text.text);
           textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 16);
-          textView.setTextColor(org.thunderdog.challegram.theme.Theme.getColor(org.thunderdog.challegram.theme.ColorId.text_primary));
+          textView.setTextColor(org.thunderdog.challegram.theme.Theme.getColor(org.thunderdog.challegram.theme.ColorId.text));
           int padding = org.thunderdog.challegram.tool.Screen.dp(16f);
           textView.setPadding(padding, padding, padding, padding);
           scrollView.addView(textView);
           android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(ctx, org.thunderdog.challegram.theme.Theme.dialogTheme());
           builder.setTitle(org.thunderdog.challegram.core.Lang.getString(R.string.CopyText));
           builder.setView(scrollView);
-          builder.setPositiveButton(org.thunderdog.challegram.core.Lang.getString(R.string.Close), null);
-          showDialog(builder.create());
+          builder.setPositiveButton(org.thunderdog.challegram.core.Lang.getString(R.string.ThemeClose), null);
+          showAlert(builder);
         }
         return true;
       } else if (id == R.id.btn_copyTranslation || id == R.id.btn_messageCopy) {

@@ -259,7 +259,7 @@ android {
     }
     variantBuilder.enable = sdkVariant.minSdk >= abiVariant.minSdk &&
       !(abiVariant.flavor == "universal" && sdkVariant.flavor == "legacy") &&
-      (variantBuilder.buildType != "debug" || sdkVariant.flavor == "legacy" || (abiVariant.flavor == "x86" || abiVariant.flavor == "x64" || abiVariant.flavor == "universal"))
+      (variantBuilder.buildType != "debug" || (sdkVariant.flavor == "latest" && (abiVariant.flavor == "x64" || abiVariant.flavor == "arm64")))
   }
   productFlavors {
     Sdk.VARIANTS.forEach { (sdkIndex, variant) ->

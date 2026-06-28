@@ -891,7 +891,34 @@ public class TGMessageMedia extends TGMessage {
   @Override
   public boolean performLongPress (View view, float x, float y) {
     boolean res = super.performLongPress(view, x, y);
-    return mosaicWrapper.performLongPress(view) || (wrapper != null && wrapper.performLongPress(view)) || res;
+    if (mosaicWrapper.performLongPress(view) || (wrapper != null && wrapper.performLongPress(view)) || res) {
+        return true;
+    }
+    org.thunderdog.challegram.navigation.ViewController<?> c = org.thunderdog.challegram.navigation.ViewController.findRoot(view);
+    if (c instanceof org.thunderdog.challegram.ui.MessagesController) {
+      org.drinkless.tdlib.TdApi.FormattedText text = org.thunderdog.challegram.telegram.Td.textOrCaption(getMessage().content);
+      if (text != null && text.text != null && !text.text.isEmpty()) {
+        android.content.Context ctx = view.getContext();
+        android.widget.ScrollView scrollView = new android.widget.ScrollView(ctx);
+        android.widget.EditText textView = new android.widget.EditText(ctx);
+        textView.setTextIsSelectable(true);
+        textView.setKeyListener(null);
+        textView.setBackground(null);
+        textView.setText(text.text);
+        textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 16);
+        textView.setTextColor(org.thunderdog.challegram.theme.Theme.getColor(org.thunderdog.challegram.theme.ColorId.text));
+        int padding = org.thunderdog.challegram.tool.Screen.dp(16f);
+        textView.setPadding(padding, padding, padding, padding);
+        scrollView.addView(textView);
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(ctx, org.thunderdog.challegram.theme.Theme.dialogTheme());
+        builder.setTitle(org.thunderdog.challegram.core.Lang.getString(org.thunderdog.challegram.R.string.CopyText));
+        builder.setView(scrollView);
+        builder.setPositiveButton(org.thunderdog.challegram.core.Lang.getString(org.thunderdog.challegram.R.string.ThemeClose), null);
+        ((org.thunderdog.challegram.ui.MessagesController) c).showAlert(builder);
+        return true;
+      }
+    }
+    return false;
   }
 
   public boolean isVideoFirstInMosaic (int mediaId) {

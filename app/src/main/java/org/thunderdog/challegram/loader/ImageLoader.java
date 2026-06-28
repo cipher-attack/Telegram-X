@@ -225,7 +225,7 @@ public class ImageLoader {
             if (actors != null && actors.remove(item) && actors.isEmpty()) {
               workers.remove(cacheKey);
               if (isPersistent && ((ImageFileRemote) file).isRemoteFileReady()) {
-                workers.remove(ImageFile.getFileLoadKey(tdlib, file.getId()));
+                workers.remove(file.getFileLoadKey());
               }
               if (!isPersistent && file.needCancellation()) {
                 tdlib.send(new TdApi.CancelDownloadFile(file.getId(), file.isCancellationOnlyPending()), tdlib.typedOkHandler());
@@ -360,7 +360,7 @@ public class ImageLoader {
         if (actors.remove(file.toString()) && actors.isEmpty()) {
           workers.remove(cacheKey);
           if (isRemote && ((ImageFileRemote) file).isRemoteFileReady()) {
-            workers.remove(ImageFile.getFileLoadKey(tdlib, file.getId()));
+            workers.remove(file.getFileLoadKey());
           }
         }
       }
