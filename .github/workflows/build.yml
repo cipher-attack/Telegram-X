@@ -27,16 +27,27 @@ jobs:
         gradle-version: wrapper
         cache-read-only: false
 
+    - name: Cache Native Dependencies
+      id: cache-native
+      uses: actions/cache@v3
+      with:
+        path: |
+          app/jni/tdlib
+          app/libs
+          app/.cxx
+          submodules/td/build
+        key: ${{ runner.os }}-native-${{ hashFiles('submodules/td/**/*.cmake', 'submodules/td/**/*.txt', 'scripts/setup.sh') }}
+        restore-keys: |
+          ${{ runner.os }}-native-
+
     - name: Cache Build Folders
       uses: actions/cache@v3
       with:
         path: |
           app/build
-          app/.cxx
-          submodules/td
           .gradle/configuration-cache
           .gradle/buildOutputCleanup
-        key: ${{ runner.os }}-build-${{ github.sha }}
+        key: ${{ runner.os }}-build-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-build-
 
@@ -51,6 +62,7 @@ jobs:
         echo "telegram.api_hash=${{ secrets.TELEGRAM_API_HASH }}" >> local.properties
 
     - name: Run setup script
+      if: steps.cache-native.outputs.cache-hit != 'true'
       env:
         TERM: xterm
         ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
