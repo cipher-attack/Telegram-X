@@ -896,7 +896,7 @@ public class TGMessageMedia extends TGMessage {
     }
     org.thunderdog.challegram.navigation.ViewController<?> c = org.thunderdog.challegram.navigation.ViewController.findRoot(view);
     if (c instanceof org.thunderdog.challegram.ui.MessagesController) {
-      org.drinkless.tdlib.TdApi.FormattedText text = org.thunderdog.challegram.data.TD.textOrCaption(getMessage().content);
+      org.drinkless.tdlib.TdApi.FormattedText text = Td.textOrCaption(getMessage().content);
       if (text != null && text.text != null && !text.text.isEmpty()) {
         android.content.Context ctx = view.getContext();
         android.widget.ScrollView scrollView = new android.widget.ScrollView(ctx);
