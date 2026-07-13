@@ -1,1 +1,0 @@
-universal_uid=; country=ET; ssmFP1=a2a05fe74a4a816494a41612afc7899c; ssmUUID=2f6af0c8-06a6-47bc-b711-78118fc49e9f; ssmSessionId=352938741783912075037634; ssmPageCount=2; ssmUserPageCount=2; _sharedID=23a1c256-915f-4fb6-a64f-d4d671cfc89d; _sharedID_cst=znv0HA%3D%3D
