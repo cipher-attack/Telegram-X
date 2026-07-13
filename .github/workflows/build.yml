@@ -7,6 +7,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Free Disk Space
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf /usr/lib/jvm/zulu*
     - uses: actions/checkout@v4
       with:
         submodules: recursive
@@ -27,20 +33,14 @@ jobs:
       id: cachekey
       run: |
         echo "hash=${{ hashFiles('**/*.gradle.kts', 'gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties', 'submodules/td/**/CMakeLists.txt', 'app/src/**/CMakeLists.txt', 'scripts/setup.sh') }}" >> "$GITHUB_OUTPUT"
-    - name: Install ccache
+    - name: Install Build Tools
       run: |
         sudo apt-get update -y
-        sudo apt-get install -y ccache
+        sudo apt-get install -y ccache ninja-build
         echo "/usr/lib/ccache" >> "$GITHUB_PATH"
         ccache --max-size=2G
         ccache --set-config=compression=true
-    - name: Cache ccache
-      uses: actions/cache@v4
-      with:
-        path: ~/.ccache
-        key: ${{ runner.os }}-ccache-${{ steps.cachekey.outputs.hash }}
-        restore-keys: |
-          ${{ runner.os }}-ccache-
+        ccache --set-config=sloppiness=file_macro,time_macros,include_file_mtime,include_file_ctime
     - name: Resolve SDK path
       id: sdkpath
       run: echo "path=${ANDROID_SDK_ROOT:-$ANDROID_HOME}" >> "$GITHUB_OUTPUT"
@@ -53,6 +53,13 @@ jobs:
         key: ${{ runner.os }}-sdk-${{ hashFiles('scripts/setup.sh', 'scripts/setup-sdk.sh') }}
         restore-keys: |
           ${{ runner.os }}-sdk-
+    - name: Cache ccache
+      uses: actions/cache@v4
+      with:
+        path: ~/.ccache
+        key: ${{ runner.os }}-ccache-${{ steps.cachekey.outputs.hash }}
+        restore-keys: |
+          ${{ runner.os }}-ccache-
     - name: Cache Gradle dependency modules
       uses: actions/cache@v4
       with:
@@ -75,14 +82,13 @@ jobs:
         key: ${{ runner.os }}-build-${{ steps.cachekey.outputs.hash }}
         restore-keys: |
           ${{ runner.os }}-build-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
     - name: Set up local.properties
       run: |
         cp local.properties.sample local.properties || true
-        echo "" >> local.properties
-        echo "telegram.api_id=${{ secrets.TELEGRAM_API_ID }}" >> local.properties
-        echo "telegram.api_hash=${{ secrets.TELEGRAM_API_HASH }}" >> local.properties
+        {
+          echo "telegram.api_id=${{ secrets.TELEGRAM_API_ID }}"
+          echo "telegram.api_hash=${{ secrets.TELEGRAM_API_HASH }}"
+        } >> local.properties
     - name: Set up signing keystore
       env:
         KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -102,38 +108,58 @@ jobs:
       env:
         TERM: xterm
       run: |
-        export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+        export ANDROID_SDK_ROOT="${{ steps.sdkpath.outputs.path }}"
         export USE_CCACHE=1
         export CCACHE_DIR="$HOME/.ccache"
         yes | bash scripts/setup.sh
-    - name: Clean Old Cached APKs
-      run: |
-        find app/build/ -type f -name "*.apk" -delete 2>/dev/null || true
-    - name: Build with Gradle (armeabi-v7a only)
+    - name: Clean Old APKs
+      run: find app/build/ -type f -name "*.apk" -delete 2>/dev/null || true
+    - name: Build with Gradle
       env:
         USE_CCACHE: 1
         CCACHE_DIR: /home/runner/.ccache
-      run: ./gradlew assembleLegacyArm32Release -Pandroid.externalNativeBuild.cmake.arguments="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache" --parallel --build-cache --configuration-cache
-    - name: ccache stats
-      run: ccache -s
-    - name: Filter and Clean APK
       run: |
+        chmod +x gradlew
+        ./gradlew assembleLegacyArm32Release \
+          -Pandroid.externalNativeBuild.cmake.arguments="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -GNinja" \
+          --parallel --build-cache --configuration-cache
+    - name: Prepare APK Metadata
+      id: prepare
+      run: |
+        RAW_APK=$(find app/build/outputs/apk/ -type f -name "*.apk" | head -n 1)
+        if [ -z "$RAW_APK" ] || [ ! -f "$RAW_APK" ]; then
+          echo "apk_found=false" >> "$GITHUB_OUTPUT"
+          echo "No APK found after build!"
+          exit 1
+        fi
+        SHA_SHORT=$(git rev-parse --short HEAD)
+        DATE=$(date +'%Y%m%d')
+        APK_NAME="TGX-Arm32-${SHA_SHORT}-${DATE}.apk"
         mkdir -p clean_apk
-        find app/build/outputs/apk/ -type f -name "*.apk" -exec cp {} clean_apk/ \;
-        ls -l clean_apk
+        cp "$RAW_APK" "clean_apk/$APK_NAME"
+        echo "apk_found=true" >> "$GITHUB_OUTPUT"
+        echo "apk_path=clean_apk/$APK_NAME" >> "$GITHUB_OUTPUT"
+        echo "apk_name=$APK_NAME" >> "$GITHUB_OUTPUT"
+        echo "commit_msg=$(git log -1 --pretty=%s)" >> "$GITHUB_OUTPUT"
     - name: Upload APK Artifact
+      if: steps.prepare.outputs.apk_found == 'true'
       uses: actions/upload-artifact@v4
       with:
-        name: Telegram-X-armeabi-v7a-Release-APK
-        path: clean_apk/*.apk
+        name: ${{ steps.prepare.outputs.apk_name }}
+        path: ${{ steps.prepare.outputs.apk_path }}
     - name: Upload APK to Telegram
+      if: steps.prepare.outputs.apk_found == 'true'
       env:
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         TG_ID: ${{ secrets.TG_ID }}
       run: |
-        APK_FILE=$(find clean_apk/ -name "*.apk" | head -n 1)
+        APK_FILE="${{ steps.prepare.outputs.apk_path }}"
         if [ -f "$APK_FILE" ]; then
-          curl -F document=@"$APK_FILE" "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument?chat_id=${TG_ID}"
+          MSG="<b>Build Complete</b>%0A<b>Branch:</b> ${{ github.ref_name }}%0A<b>Commit:</b> <code>${{ steps.prepare.outputs.commit_msg }}</code>"
+          curl -F document=@"$APK_FILE" \
+               "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument?chat_id=${TG_ID}&caption=${MSG}&parse_mode=HTML"
         else
           echo "No APK found to upload!"
         fi
+    - name: ccache stats
+      run: ccache -s
