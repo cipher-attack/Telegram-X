@@ -27,7 +27,6 @@ jobs:
       with:
         gradle-version: wrapper
         cache-read-only: false
-        validate-wrappers: false
 
     - name: Cache Build Folders
       uses: actions/cache@v4
