@@ -591,9 +591,11 @@ dependencies {
   )
   flavorImplementation(
     libs.google.play.services.location.legacy,
+    libs.google.play.services.location.legacy,
     libs.google.play.services.location.latest
   )
   flavorImplementation(
+    libs.google.play.services.safetynet.legacy,
     libs.google.play.services.safetynet.legacy,
     libs.google.play.services.safetynet.latest
   )
