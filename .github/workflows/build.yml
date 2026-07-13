@@ -83,12 +83,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-build-
     - name: Set up local.properties
-      run: |
-        cp local.properties.sample local.properties || true
-        {
-          echo "telegram.api_id=${{ secrets.TELEGRAM_API_ID }}"
-          echo "telegram.api_hash=${{ secrets.TELEGRAM_API_HASH }}"
-        } >> local.properties
+  run: |
+    cp local.properties.sample local.properties || true
+    echo "" >> local.properties
+    {
+      echo "telegram.api_id=${{ secrets.TELEGRAM_API_ID }}"
+      echo "telegram.api_hash=${{ secrets.TELEGRAM_API_HASH }}"
+    } >> local.properties
     - name: Set up signing keystore
       env:
         KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
