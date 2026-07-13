@@ -27,6 +27,7 @@ jobs:
       with:
         gradle-version: wrapper
         cache-read-only: false
+        validate-wrappers: true
 
     - name: Cache Build Folders
       uses: actions/cache@v4
@@ -51,11 +52,27 @@ jobs:
         echo "telegram.api_id=${{ secrets.TELEGRAM_API_ID }}" >> local.properties
         echo "telegram.api_hash=${{ secrets.TELEGRAM_API_HASH }}" >> local.properties
 
+    - name: Set up signing keystore
+      env:
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: |
+        echo "$KEYSTORE_BASE64" | base64 -d > "${{ github.workspace }}/release.jks"
+        cat > "${{ github.workspace }}/keystore.properties" << EOF
+        keystore.file=${{ github.workspace }}/release.jks
+        keystore.password=$KEYSTORE_PASSWORD
+        key.alias=$KEY_ALIAS
+        key.password=$KEY_PASSWORD
+        EOF
+        echo "keystore.file=${{ github.workspace }}/keystore.properties" >> local.properties
+
     - name: Run setup script
       env:
         TERM: xterm
-        ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
       run: |
+        export ANDROID_SDK_ROOT="$ANDROID_HOME"
         yes | bash scripts/setup.sh
 
     - name: Clean Old Cached APKs
@@ -63,18 +80,18 @@ jobs:
         find app/build/ -type f -name "*.apk" -delete 2>/dev/null || true
 
     - name: Build with Gradle (armeabi-v7a only)
-      run: ./gradlew assembleLegacyArm32Debug --parallel --build-cache --configuration-cache
+      run: ./gradlew assembleLegacyArm32Release --parallel --build-cache --configuration-cache
 
     - name: Filter and Clean APK
       run: |
         mkdir -p clean_apk
-        find app/build/outputs/apk/ -type f -name "*debug*.apk" -exec cp {} clean_apk/ \;
+        find app/build/outputs/apk/ -type f -name "*.apk" -exec cp {} clean_apk/ \;
         ls -l clean_apk
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Telegram-X-armeabi-v7a-Debug-APK
+        name: Telegram-X-armeabi-v7a-Release-APK
         path: clean_apk/*.apk
 
     - name: Upload APK to Telegram
