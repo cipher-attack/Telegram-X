@@ -115,7 +115,7 @@ jobs:
         yes | bash scripts/setup.sh
     - name: Clean Old APKs
       run: find app/build/ -type f -name "*.apk" -delete 2>/dev/null || true
-        - name: Build with Gradle
+    - name: Build with Gradle
       env:
         USE_CCACHE: 1
         CCACHE_DIR: /home/runner/.ccache
