@@ -1,6 +1,6 @@
 ### tg x
 
-This is the complete source code and the build instructions for the official alternative Android client for the Telegram messenger.
+This is the complete source code and the build instructions for the customized Android client for the Telegram messenger, maintained by cipher-attack.
 
 ### Prerequisites
 
@@ -22,7 +22,7 @@ This is the complete source code and the build instructions for the official alt
 
 ### Building
 
-1. `$ git clone --recursive --depth=1 --shallow-submodules https://github.com/TGX-Android/Telegram-X tgx` — clone **Telegram X** with submodules
+1. `$ git clone --recursive --depth=1 --shallow-submodules https://github.com/cipher-attack/telegram-x tgx` — clone the repository with submodules
 2. In case you forgot the `--recursive` flag, `cd` into `tgx` directory and: `$ git submodule init && git submodule update --init --recursive --depth=1`
 3. Create `keystore.properties` file outside of source tree with the following properties:<br/>`keystore.file`: absolute path to the keystore file<br/>`keystore.password`: password for the keystore<br/>`key.alias`: key alias that will be used to sign the app<br/>`key.password`: key password.<br/>**Warning**: keep this file safe and make sure nobody, except you, has access to it. For production builds one could use a separate user with home folder encryption to avoid harm from physical theft
 4. `$ cd tgx`
@@ -38,11 +38,18 @@ This is the complete source code and the build instructions for the official alt
 * `x86`: **x86** build
 * `universal`: universal build that includes native bundles for all platforms.
 
+### Automated Builds (GitHub Actions)
+
+This repository includes a GitHub Actions workflow to build and sign APKs automatically. To use this setup, configure the following secrets in your repository settings:
+* `KEYSTORE_BASE64`: The base64-encoded keystore file
+* `BOT_TOKEN`: Telegram bot token for APK delivery
+* `TG_ID`: Telegram chat or channel ID
+
 ### Quick setup for development
 
-If you are developing a [contribution](https://github.com/TGX-Android/Telegram-X/blob/main/docs/PULL_REQUEST_TEMPLATE.md) to the project, you may follow the simpler building steps:
+If you are developing a contribution to the project, you may follow the simpler building steps:
 
-1. `$ git clone --recursive https://github.com/TGX-Android/Telegram-X tgx`
+1. `$ git clone --recursive https://github.com/cipher-attack/telegram-x tgx`
 2. `$ cd tgx`
 3. [Obtain Telegram API credentials](https://core.telegram.org/api/obtaining_api_id)
 4. Create `local.properties` file in the root project folder using any text editor:<br/><pre># Location where you have Android SDK installed
