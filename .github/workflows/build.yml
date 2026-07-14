@@ -124,7 +124,7 @@ jobs:
         ./gradlew assembleLegacyArm32Release \
           -Pandroid.externalNativeBuild.cmake.arguments="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -GNinja" \
           --parallel --build-cache --configuration-cache
-    - name: Prepare APK Metadata
+        - name: Prepare APK Metadata
       id: prepare
       run: |
         RAW_APK=$(find app/build/outputs/apk/ -type f -name "*.apk" | head -n 1)
@@ -142,25 +142,29 @@ jobs:
         echo "apk_path=clean_apk/$APK_NAME" >> "$GITHUB_OUTPUT"
         echo "apk_name=$APK_NAME" >> "$GITHUB_OUTPUT"
         echo "commit_msg=$(git log -1 --pretty=%s)" >> "$GITHUB_OUTPUT"
-    - name: Upload APK Artifact
-      if: steps.prepare.outputs.apk_found == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ steps.prepare.outputs.apk_name }}
-        path: ${{ steps.prepare.outputs.apk_path }}
+
     - name: Upload APK to Telegram
       if: steps.prepare.outputs.apk_found == 'true'
       env:
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         TG_ID: ${{ secrets.TG_ID }}
+        COMMIT_MSG: ${{ steps.prepare.outputs.commit_msg }}
+        BRANCH_NAME: ${{ github.ref_name }}
+        APK_FILE: ${{ steps.prepare.outputs.apk_path }}
       run: |
-        APK_FILE="${{ steps.prepare.outputs.apk_path }}"
         if [ -f "$APK_FILE" ]; then
-          MSG="<b>Build Complete</b>%0A<b>Branch:</b> ${{ github.ref_name }}%0A<b>Commit:</b> <code>${{ steps.prepare.outputs.commit_msg }}</code>"
+          MSG="<b>Build Complete</b>
+          <b>Branch:</b> $BRANCH_NAME
+          <b>Commit:</b> <code>$COMMIT_MSG</code>"
+
           curl -F document=@"$APK_FILE" \
-               "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument?chat_id=${TG_ID}&caption=${MSG}&parse_mode=HTML"
+               -F chat_id="${TG_ID}" \
+               -F caption="$MSG" \
+               -F parse_mode="HTML" \
+               "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument"
         else
           echo "No APK found to upload!"
         fi
+
     - name: ccache stats
       run: ccache -s
