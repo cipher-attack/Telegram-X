@@ -8,4 +8,4 @@ https://t.me/tgx_bot — verify APK checksum for authenticity against modificati
 
 ### Source Code
 
-https://github.com/TGX-Android/Telegram-X — main repository of Telegram X
+https://github.com/cipher-attack/telegram-x — main repository of Telegram X
