@@ -543,7 +543,7 @@ public class MainActivity extends BaseActivity implements GlobalAccountListener,
   }
 
   private void showExperimentalAlert () {
-    if (BuildConfig.EXPERIMENTAL && !BuildConfig.DEBUG) {
+    if (false && BuildConfig.EXPERIMENTAL && !BuildConfig.DEBUG) {
       ViewController<?> c = navigation.getCurrentStackItem();
       if (c != null) {
         c.openAlert(R.string.ExperimentalBuildTitle,
