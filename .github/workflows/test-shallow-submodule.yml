@@ -1,0 +1,24 @@
+name: Test Shallow Submodule
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Test shallow clone of webrtc_deps third_party
+      run: |
+        time git submodule update --init --depth 1 -- app/jni/tgvoip/third_party/webrtc_deps/third_party
+        cd app/jni/tgvoip/third_party/webrtc_deps/third_party
+        echo "HEAD commit:"
+        git rev-parse HEAD
+        echo "Expected commit: 62f77755842ba1abb833a74141e811f652a3e327"
+        cd -
+        echo "Folder size:"
+        du -sh app/jni/tgvoip/third_party/webrtc_deps/third_party
+    - name: Test shallow clone of webrtc parent submodule
+      run: |
+        time git submodule update --init --depth 1 -- app/jni/tgvoip/third_party/webrtc
+    - name: Test shallow clone of tdlib openssl group
+      run: |
+        time git submodule update --init --depth 1 -- tdlib/source/openssl
