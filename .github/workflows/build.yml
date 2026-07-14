@@ -115,7 +115,7 @@ jobs:
         yes | bash scripts/setup.sh
     - name: Clean Old APKs
       run: find app/build/ -type f -name "*.apk" -delete 2>/dev/null || true
-    - name: Build with Gradle
+        - name: Build with Gradle
       env:
         USE_CCACHE: 1
         CCACHE_DIR: /home/runner/.ccache
@@ -124,7 +124,8 @@ jobs:
         ./gradlew assembleLegacyArm32Release \
           -Pandroid.externalNativeBuild.cmake.arguments="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -GNinja" \
           --parallel --build-cache --configuration-cache
-       - name: Prepare APK Metadata
+
+    - name: Prepare APK Metadata
       id: prepare
       run: |
         RAW_APK=$(find app/build/outputs/apk/ -type f -name "*.apk" | head -n 1)
