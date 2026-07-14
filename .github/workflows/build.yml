@@ -160,7 +160,7 @@ jobs:
 
           curl -F document=@"$APK_FILE" \
                -F chat_id="${TG_ID}" \
-               -F caption="$MSG" \
+               --form-string caption="$MSG" \
                -F parse_mode="HTML" \
                "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument"
         else
