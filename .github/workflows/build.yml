@@ -44,6 +44,8 @@ jobs:
     - name: Resolve SDK path
       id: sdkpath
       run: echo "path=${ANDROID_SDK_ROOT:-$ANDROID_HOME}" >> "$GITHUB_OUTPUT"
+    - name: Fix SDK/NDK ownership for caching
+      run: sudo chown -R "$(whoami)":"$(whoami)" "${{ steps.sdkpath.outputs.path }}"
     - name: Cache Android SDK and NDK
       uses: actions/cache@v4
       with:
