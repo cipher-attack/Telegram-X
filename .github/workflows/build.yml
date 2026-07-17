@@ -146,6 +146,12 @@ jobs:
         echo "apk_name=$APK_NAME" >> "$GITHUB_OUTPUT"
         echo "commit_msg=$(git log -1 --pretty=%s)" >> "$GITHUB_OUTPUT"
 
+    - name: Upload mapping.txt
+      uses: actions/upload-artifact@v4
+      with:
+        name: mapping
+        path: app/build/outputs/mapping/legacyArm32Release/mapping.txt
+
     - name: Upload APK to Telegram
       if: steps.prepare.outputs.apk_found == 'true'
       env:
