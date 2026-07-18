@@ -41,6 +41,7 @@ jobs:
         ccache --max-size=2G
         ccache --set-config=compression=true
         ccache --set-config=sloppiness=file_macro,time_macros,include_file_mtime,include_file_ctime
+        ccache --set-config=base_dir=/home/runner/work/Telegram-X/Telegram-X
     - name: Resolve SDK path
       id: sdkpath
       run: echo "path=${ANDROID_SDK_ROOT:-$ANDROID_HOME}" >> "$GITHUB_OUTPUT"
