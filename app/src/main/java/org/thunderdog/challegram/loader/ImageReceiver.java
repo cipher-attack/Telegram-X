@@ -1292,6 +1292,7 @@ public class ImageReceiver implements Watcher, ValueAnimator.AnimatorUpdateListe
   }
 
   private static void drawBitmap (Canvas c, Bitmap bitmap, float left, float top, boolean needMirrorHorizontally, boolean needMirrorVertically, Paint paint) {
+    if (bitmap == null || bitmap.isRecycled()) return;
     try {
       c.save();
       c.scale(needMirrorHorizontally ? -1 : 1, needMirrorVertically ? -1 : 1, left + bitmap.getWidth() / 2f, top + bitmap.getHeight() / 2f);
@@ -1306,6 +1307,7 @@ public class ImageReceiver implements Watcher, ValueAnimator.AnimatorUpdateListe
   private static final Rect tmpRect = new Rect();
 
   private static void drawBitmap (Canvas c, Bitmap bitmap, Rect rect, Rect drawRegion, boolean needMirrorHorizontally, boolean needMirrorVertically, Paint paint) {
+    if (bitmap == null || bitmap.isRecycled()) return;
     try {
       c.save();
       c.scale(needMirrorHorizontally ? -1 : 1, needMirrorVertically ? -1 : 1, drawRegion.centerX(), drawRegion.centerY());

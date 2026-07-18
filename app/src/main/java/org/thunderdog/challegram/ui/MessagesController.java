@@ -1959,7 +1959,7 @@ public class MessagesController extends ViewController<MessagesController.Argume
     if (referrer != null) {
       tdlib.send(new TdApi.JoinChatByInviteLink(referrer.inviteLink), (chat, error) -> {
         if (error != null) {
-          tdlib.send(new TdApi.AddChatMember(chat.id, tdlib.myUserId(), 0), tdlib.errorHandler());
+          if (chat != null) { tdlib.send(new TdApi.AddChatMember(chat.id, tdlib.myUserId(), 0), tdlib.errorHandler()); }
         }
       });
     } else {
