@@ -214,6 +214,7 @@ list(APPEND TGCALLS_EXCLUDE_LIBS
 Join(TGCALLS_EXCLUDE_LIBS "${TGCALLS_EXCLUDE_LIBS}" ",")
 target_link_options(${TGCALLS_LIB} PUBLIC
   -Wl,--exclude-libs,${TGCALLS_EXCLUDE_LIBS}
+  -Wl,--allow-multiple-definition
 )
 
 if (${ANDROID_ABI} STREQUAL "arm64-v8a" OR ${ANDROID_ABI} STREQUAL "x86_64")
