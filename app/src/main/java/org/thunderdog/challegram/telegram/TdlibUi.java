@@ -101,6 +101,7 @@ import org.thunderdog.challegram.ui.EditNameController;
 import org.thunderdog.challegram.ui.EditProxyController;
 import org.thunderdog.challegram.ui.EditRightsController;
 import org.thunderdog.challegram.ui.EditUsernameController;
+import org.thunderdog.challegram.ui.GroupCallActivity;
 import org.thunderdog.challegram.ui.InstantViewController;
 import org.thunderdog.challegram.ui.ListItem;
 import org.thunderdog.challegram.ui.MainController;
@@ -7630,7 +7631,10 @@ public class TdlibUi extends Handler {
   }
 
   public void openVoiceChat (ViewController<?> context, int groupCallId, @Nullable UrlOpenParameters openParameters) {
-    // TODO open voice chat layer
+    GroupCallActivity controller = new GroupCallActivity(context.context(), context.tdlib());
+    // TODO: chatId is a placeholder (0) until callers can supply the real chat id.
+    controller.setArguments(new GroupCallActivity.Args(0, groupCallId, false));
+    context.navigateTo(controller);
   }
 
   // Suggestions by emoji
