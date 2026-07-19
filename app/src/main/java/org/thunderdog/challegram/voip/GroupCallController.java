@@ -249,27 +249,18 @@ public class GroupCallController {
       if (groupCallId == 0) return;
 
       // Build TdApi.JoinGroupCall with our payload
-      TdApi.GroupCallPayload payload = new TdApi.GroupCallPayload();
-      payload.type = new TdApi.GroupCallPayloadTypeWebrtc(payloadJson, false);
-
-      TdApi.JoinGroupCall joinCall = new TdApi.JoinGroupCall();
-      joinCall.groupCallId   = (int) groupCallId;
-      joinCall.payload       = payload;
-      joinCall.audioSourceId = 0;
-      joinCall.isMuted       = false;
-      joinCall.isMyVideoEnabled = false;
-      joinCall.inviteHash    = "";
-
+      TdApi.JoinGroupCall joinCall = new TdApi.JoinGroupCall(
+          (int) groupCallId, null, 0, payloadJson, false, false, "");
       tdlib.client().send(joinCall, result -> {
-        if (result instanceof TdApi.GroupCallJoinResponse) {
-          TdApi.GroupCallJoinResponse resp = (TdApi.GroupCallJoinResponse) result;
-          if (resp.payload != null && resp.payload.type instanceof TdApi.GroupCallPayloadTypeWebrtc) {
-            String responseJson = ((TdApi.GroupCallPayloadTypeWebrtc) resp.payload.type).sdp;
-            // Feed TDLib's SDP answer back to C++
-            long ptr = nativePtr;
-            if (ptr != 0) {
-              nativeSetJoinResponsePayload(ptr, responseJson);
-            }
+        if (result instanceof TdApi.Text) {
+          String responseJson = ((TdApi.Text) result).text;
+          long ptr = nativePtr;
+          if (ptr != 0) nativeSetJoinResponsePayload(ptr, responseJson);
+        } else if (result instanceof TdApi.Error) {
+          TdApi.Error err = (TdApi.Error) result;
+          Log.e(TAG, "JoinGroupCall error: " + err.code + " " + err.message);
+        }
+      });
           }
         } else if (result instanceof TdApi.Error) {
           TdApi.Error err = (TdApi.Error) result;
@@ -308,16 +299,16 @@ public class GroupCallController {
     req.videoQuality   = null;
 
     tdlib.client().send(req, result -> {
-      if (result instanceof TdApi.FilePart) {
-        TdApi.FilePart part = (TdApi.FilePart) result;
-        provideAudioBroadcastPart(
-            timestamp,
-            System.currentTimeMillis() / 1000.0,
-            PART_SUCCESS,
-            part.data
-        );
-      } else {
+      if (result instanceof TdApi.Error) {
         provideAudioBroadcastPart(timestamp, 0, PART_NOT_READY, null);
+      } else {
+        try {
+          java.lang.reflect.Field fd = result.getClass().getField("data");
+          byte[] data = (byte[]) fd.get(result);
+          provideAudioBroadcastPart(timestamp, System.currentTimeMillis() / 1000.0, PART_SUCCESS, data);
+        } catch (Exception e) {
+          provideAudioBroadcastPart(timestamp, 0, PART_NOT_READY, null);
+        }
       }
     });
   }
@@ -339,16 +330,16 @@ public class GroupCallController {
     }
 
     tdlib.client().send(req, result -> {
-      if (result instanceof TdApi.FilePart) {
-        TdApi.FilePart part = (TdApi.FilePart) result;
-        provideVideoBroadcastPart(
-            timestamp,
-            System.currentTimeMillis() / 1000.0,
-            PART_SUCCESS,
-            part.data
-        );
-      } else {
+      if (result instanceof TdApi.Error) {
         provideVideoBroadcastPart(timestamp, 0, PART_NOT_READY, null);
+      } else {
+        try {
+          java.lang.reflect.Field fd = result.getClass().getField("data");
+          byte[] data = (byte[]) fd.get(result);
+          provideVideoBroadcastPart(timestamp, System.currentTimeMillis() / 1000.0, PART_SUCCESS, data);
+        } catch (Exception e) {
+          provideVideoBroadcastPart(timestamp, 0, PART_NOT_READY, null);
+        }
       }
     });
   }
