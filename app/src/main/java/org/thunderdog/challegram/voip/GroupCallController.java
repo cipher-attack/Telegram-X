@@ -248,9 +248,12 @@ public class GroupCallController {
 
       if (groupCallId == 0) return;
 
-      // Build TdApi.JoinGroupCall with our payload
-      TdApi.JoinGroupCall joinCall = new TdApi.JoinGroupCall(
-          (int) groupCallId, null, 0, payloadJson, false, false, "");
+      // Build TdApi.JoinVideoChat with our payload (new TDLib API:
+      // groupCallId + participantId + GroupCallJoinParameters + inviteHash)
+      TdApi.GroupCallJoinParameters joinParams = new TdApi.GroupCallJoinParameters(
+          0, payloadJson, false, false);
+      TdApi.JoinVideoChat joinCall = new TdApi.JoinVideoChat(
+          (int) groupCallId, null, joinParams, "");
       tdlib.client().send(joinCall, result -> {
         if (result instanceof TdApi.Text) {
           String responseJson = ((TdApi.Text) result).text;
