@@ -3,6 +3,7 @@
 set(RNNOISE_DIR "${TGCALLS_DEPS_DIR}/rnnoise")
 
 add_library(rnnoise STATIC
+  "${RNNOISE_DIR}/src/kiss_fft.c"
   "${RNNOISE_DIR}/src/celt_lpc.c"
   "${RNNOISE_DIR}/src/denoise.c"
   "${RNNOISE_DIR}/src/pitch.c"
@@ -13,4 +14,7 @@ add_library(rnnoise STATIC
 )
 target_include_directories(rnnoise PUBLIC
   "${RNNOISE_DIR}/include"
+)
+target_link_options(rnnoise INTERFACE
+  -Wl,--allow-multiple-definition
 )
