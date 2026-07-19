@@ -261,12 +261,6 @@ public class GroupCallController {
           Log.e(TAG, "JoinGroupCall error: " + err.code + " " + err.message);
         }
       });
-          }
-        } else if (result instanceof TdApi.Error) {
-          TdApi.Error err = (TdApi.Error) result;
-          Log.e(TAG, "JoinGroupCall error: " + err.code + " " + err.message);
-        }
-      });
     });
   }
 
