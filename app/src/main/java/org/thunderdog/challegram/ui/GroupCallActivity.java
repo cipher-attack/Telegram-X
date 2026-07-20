@@ -143,8 +143,8 @@ public class GroupCallActivity extends ViewController<GroupCallActivity.Args>
   }
 
   @Override
-  public void onDestroy () {
-    super.onDestroy();
+  public void destroy () {
+    super.destroy();
     if (controller != null) {
       controller.destroy();
       controller = null;
@@ -487,7 +487,7 @@ public class GroupCallActivity extends ViewController<GroupCallActivity.Args>
         participants.add(p);
       }
       if (p != null) {
-        p.isMuted = participant.isMuted;
+        p.isMuted = participant.isMutedForAllUsers;
         if (adapter != null) adapter.notifyDataSetChanged();
       }
     });
