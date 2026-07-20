@@ -127,6 +127,7 @@
   <item type="id" name="controller_logOut" />
   <item type="id" name="controller_editLanguage" />
   <item type="id" name="controller_editChatLink" />
+  <item type="id" name="controller_groupCall" />
   <item type="id" name="controller_editSession" />
   <item type="id" name="controller_strings" />
   <item type="id" name="controller_editPhone" />

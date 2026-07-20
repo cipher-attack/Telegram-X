@@ -461,7 +461,10 @@ public class GroupCallActivity extends ViewController<GroupCallActivity.Args>
 
     void bind (Participant p) {
       nameView.setText(p.name + (p.isMuted ? "  🔇" : ""));
-      levelBar.invalidate();
+      if (levelBar instanceof View) {
+        ((android.widget.FrameLayout.LayoutParams) levelBar.getLayoutParams());
+        levelBar.invalidate();
+      }
     }
   }
 
